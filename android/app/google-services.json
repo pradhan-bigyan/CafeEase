@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "876191657794",
+    "project_id": "kyafeease",
+    "storage_bucket": "kyafeease.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876191657794:android:84e9806ea70a7f112ee2db",
+        "android_client_info": {
+          "package_name": "com.example.kyafeease"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYsegZ-IEZCli5YFh8Y8NfU6mRJQAzN44"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

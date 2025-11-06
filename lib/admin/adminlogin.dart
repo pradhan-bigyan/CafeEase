@@ -1,0 +1,267 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kyafeease/admin/admin_dashboard.dart';
+import 'package:kyafeease/employee/employeelogin.dart';
+import 'package:kyafeease/pages/login.dart';
+import 'package:kyafeease/widgets/widget_support.dart';
+
+class AdminLogin extends StatefulWidget {
+  const AdminLogin({super.key});
+
+  @override
+  State<AdminLogin> createState() => _AdminLoginState();
+}
+
+class _AdminLoginState extends State<AdminLogin> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+
+  void _adminLogin() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final snapshot = await FirebaseFirestore.instance.collection("Admin").get();
+        bool isAuthenticated = false;
+        
+        for (var result in snapshot.docs) {
+          if (result.data()['id'] == _emailController.text.trim() && 
+              result.data()['password'] == _passwordController.text.trim()) {
+            isAuthenticated = true;
+            break;
+          }
+        }
+        
+        if (isAuthenticated) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AdminDashboard()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Color.fromARGB(255, 180, 69 , 69),
+              content: Text(
+                "Invalid email or password",
+                style: TextStyle(fontSize: 18.0),
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred: $e'),
+          ),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Container(
+        child: Stack(
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 2.5,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color.fromARGB(255, 246, 245, 247),
+                    Color.fromARGB(255, 180, 69, 69),
+                    Color.fromARGB(255, 237, 240, 243)
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 3),
+              height: MediaQuery.of(context).size.height / 2,
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
+                ),
+              ),
+              child: Text(""),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 60.0, left: 20.0, right: 20.0),
+              child: Column(
+                children: [
+                  Center(
+                    child: Image.asset(
+                      "images/logo.png",
+                      width: MediaQuery.of(context).size.width / 1.5,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Material(
+                    elevation: 5.0,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: EdgeInsets.only(left: 20.0, right: 20.0),
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 2.25,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 20.0,
+                            ),
+                            Text(
+                              "Admin Login",
+                              style: AppWidget.HeaderTextFieldStyle(),
+                            ),
+                            SizedBox(
+                              height: 30.0,
+                            ),
+                            TextFormField(
+                              controller: _emailController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter email';
+                                }
+                                return null;
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Email',
+                                hintStyle: AppWidget.semiboldTextFieldStyle(),
+                                prefixIcon: Icon(Icons.email_outlined),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 30.0,
+                            ),
+                            TextFormField(
+                              controller: _passwordController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter password';
+                                }
+                                return null;
+                              },
+                              obscureText: true,
+                              decoration: InputDecoration(
+                                hintText: 'Password',
+                                hintStyle: AppWidget.semiboldTextFieldStyle(),
+                                prefixIcon: Icon(Icons.password_outlined),
+                              ),
+                            ),                           
+                            SizedBox(
+                              height: 40.0,
+                            ),
+                            Material(
+                              elevation: 5.0,
+                              borderRadius: BorderRadius.circular(20),
+                              child: InkWell(
+                                onTap: _isLoading ? null : _adminLogin,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                                  width: 200,
+                                  decoration: BoxDecoration(
+                                    color: Color.fromARGB(255, 180, 69, 69),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Center(
+                                    child: _isLoading
+                                        ? CircularProgressIndicator(
+                                            color: Colors.white)
+                                        : Text(
+                                            "LOGIN",
+                                            style: TextStyle(
+                                              color: Color.fromARGB(
+                                                  255, 255, 255, 255),
+                                              fontSize: 18.0,
+                                              fontFamily: "Poppins1",
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 50.0),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Login()),
+                      );
+                    },
+                     child: RichText(
+        text: TextSpan(
+          style: AppWidget.semiboldTextFieldStyle(),
+          children: [
+            TextSpan(
+              text: "Not an Admin?",
+            ),
+            TextSpan(
+              text: " User Login",
+              style: AppWidget.semiboldTextFieldStyle().copyWith(color: const Color.fromARGB(255, 180, 69, 69)),
+            ),
+          ],
+        ),
+      ),
+                  ),
+                  SizedBox(height: 10.0),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Employeelogin()),
+                      );
+                    },
+                    child: RichText(
+        text: TextSpan(
+          style: AppWidget.semiboldTextFieldStyle(),
+          children: [
+            TextSpan(
+              text: "Are you an employee?",
+            ),
+            TextSpan(
+              text: "Login",
+              style: AppWidget.semiboldTextFieldStyle().copyWith(color: const Color.fromARGB(255, 180, 69, 69)),
+            ),
+          ],
+        ),
+      ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
